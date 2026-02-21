@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import './App.css';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navigation from './sections/Navigation';
 import Hero from './sections/Hero';
 import About from './sections/About';
@@ -35,6 +36,7 @@ function App() {
         <Contact />
       </main>
       <Footer />
+      <SpeedInsights />
     </div>
   );
 }
