@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { MapPin, Mail, Clock, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
