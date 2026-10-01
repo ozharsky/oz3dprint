@@ -63,7 +63,7 @@ function page(bodyHtml) {
     "<p>Complete your purchase</p></header>" + bodyHtml + "</div></body></html>";
 }
 
-module.exports = function (req, res) {
+export default function handler(req, res) {
   var q = req.query || {};
   var raw = q.products || "";
   var coupon = q.coupon;
