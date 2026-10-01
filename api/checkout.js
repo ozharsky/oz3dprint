@@ -63,6 +63,21 @@ function page(bodyHtml) {
     "<p>Complete your purchase</p></header>" + bodyHtml + "</div></body></html>";
 }
 
+function resolveKey(key) {
+  if (NUMERIC_IDS[key]) key = NUMERIC_IDS[key];
+  if (PRODUCTS[key]) return { id: key, color: null };
+  // Variant retailer IDs look like "oz3d-08-matte-black" — fall back to the
+  // base product and surface the color in the cart line.
+  var m = /^oz3d-\d+/.exec(key);
+  if (m && PRODUCTS[m[0]] && key.length > m[0].length) {
+    var color = key.slice(m[0].length + 1).split("-").map(function (w) {
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(" ");
+    return { id: m[0], color: color };
+  }
+  return null;
+}
+
 export default function handler(req, res) {
   var q = req.query || {};
   var raw = q.products || "";
@@ -72,12 +87,10 @@ export default function handler(req, res) {
   String(raw).split(",").forEach(function (entry) {
     var parts = entry.split(":");
     if (parts.length !== 2) return;
-    var key = parts[0].trim();
-    if (NUMERIC_IDS[key]) key = NUMERIC_IDS[key];
-    var prod = PRODUCTS[key];
+    var r = resolveKey(parts[0].trim());
     var qty = parseInt(parts[1], 10);
-    if (!prod || !(qty > 0)) return;
-    items.push({ prod: prod, qty: qty });
+    if (!r || !(qty > 0)) return;
+    items.push({ prod: PRODUCTS[r.id], qty: qty, color: r.color });
   });
 
   var bodyHtml;
@@ -93,7 +106,7 @@ export default function handler(req, res) {
       subtotal += line;
       html += "<div class=\"card\"><img src=\"" + esc(it.prod.img) + "\" alt=\"\">" +
         "<div class=\"info\"><div class=\"t\">" + esc(it.prod.t) + "</div>" +
-        "<div class=\"q\">Qty: " + it.qty + "</div></div>" +
+        "<div class=\"q\">Qty: " + it.qty + (it.color ? " &middot; " + esc(it.color) : "") + "</div></div>" +
         "<div class=\"price\">" + money(line) + "</div></div>";
     });
     html += "<div class=\"totals\"><div class=\"row\"><span>Subtotal</span><span>" + money(subtotal) + "</span></div>" +
